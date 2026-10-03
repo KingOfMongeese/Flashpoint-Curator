@@ -35,3 +35,15 @@ opt-level = 2 # fast and small wasm
 # Optimize all dependencies even in debug builds:
 [profile.dev.package."*"]
 opt-level = 2
+
+[dev-dependencies]
+cucumber = "0.23.0"
+tokio = { version = "1.53.1", features = ["full"] }
+
+[[test]]
+name = "configuring"
+harness = false  # allows Cucumber to print output instead of libtest
+
+[[test]]
+name = "massive_slayer_mult"
+harness = false  # allows Cucumber to print output instead of libtest
