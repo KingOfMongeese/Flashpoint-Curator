@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use rand::seq::SliceRandom;
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(default)]
 pub struct HaloFlashPointCurator {
     pub state: AppState,
