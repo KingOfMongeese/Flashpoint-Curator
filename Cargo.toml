@@ -43,3 +43,7 @@ tokio = { version = "1.53.1", features = ["full"] }
 [[test]]
 name = "configuring"
 harness = false  # allows Cucumber to print output instead of libtest
+
+[[test]]
+name = "massive_slayer_mult"
+harness = false  # allows Cucumber to print output instead of libtest

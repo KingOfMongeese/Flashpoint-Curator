@@ -94,4 +94,82 @@ impl HaloFlashPointCurator {
                 .cmp(&b.current_turn_order_number)
         });
     }
+
+    pub fn handle_end_turn_click(&mut self) {
+        // resfresh player turn slots
+        self.turn_slot = 1;
+        for player in &mut self.players {
+            player.end_turn();
+        }
+
+        // see if we are in battle royal
+        if self
+            .players
+            .iter()
+            .find(|p| p.kill_count >= self.battle_royal_kill_required)
+            .is_some()
+        {
+            let mut highest_kill_cnt = self.players[0].kill_count;
+            for player in &self.players {
+                if player.kill_count > highest_kill_cnt {
+                    highest_kill_cnt = player.kill_count;
+                }
+            }
+
+            self.battle_royal_kill_required = highest_kill_cnt;
+
+            // get all the players we will elimnate
+            let elimated_players: Vec<Player> = self
+                .players
+                .iter()
+                .filter(|p| p.kill_count < self.battle_royal_kill_required)
+                .map(|p| p.clone())
+                .collect();
+
+            self.eliminated_players.extend(elimated_players);
+
+            // only keep players that meet the kill count
+            self.players
+                .retain(|p| p.kill_count >= self.battle_royal_kill_required);
+
+            // now the kill count will be 1 higher
+            self.battle_royal_kill_required += 1;
+
+            // reset the turn slots as we removed players
+            self.players.sort_by(|a, b| {
+                a.current_turn_order_number
+                    .cmp(&b.current_turn_order_number)
+            });
+
+            // fix the turn slots number
+            self.players
+                .iter_mut()
+                .enumerate()
+                .for_each(|(corrected_turn_slot, p)| {
+                    p.current_turn_order_number = corrected_turn_slot + 1
+                });
+        }
+
+        // sort the players by turn order number
+        self.players.sort_by(|a, b| {
+            a.current_turn_order_number
+                .cmp(&b.current_turn_order_number)
+        });
+
+        self.turn_count += 1;
+    }
+}
+
+pub fn handle_remove_kill_click(player: &mut Player) {
+    player.kill_count = player.kill_count.saturating_sub(1);
+}
+
+pub fn handle_add_kill_click(player: &mut Player) {
+    player.kill_count = player.kill_count.saturating_add(1);
+}
+
+pub fn handle_player_pass_click(turn_slot: &mut usize, player: &mut Player) {
+    player.next_turn_order_number = *turn_slot;
+    *turn_slot += 1;
+    player.turn_state = PlayerTurnState::Passed;
 }

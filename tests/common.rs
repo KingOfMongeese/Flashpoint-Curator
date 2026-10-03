@@ -1,10 +1,20 @@
 use cucumber::{given, then, when};
 
-use flashpoint_curator::{HaloFlashPointCurator, AppState};
+use flashpoint_curator::{AppState, HaloFlashPointCurator, Player};
 
 #[derive(Debug, Default, cucumber::World)]
 pub struct World {
     pub app: HaloFlashPointCurator,
+}
+
+#[allow(dead_code, reason = "testing modules, acutally gets used in others")]
+pub fn get_player_by_name<'a>(world: &'a World, name: &String) -> Option<&'a Player> {
+    world.app.players.iter().find(|p| p.name == *name)
+}
+
+#[allow(dead_code, reason = "testing modules, acutally gets used in others")]
+pub fn get_player_by_name_mut<'a>(world: &'a mut World, name: &String) -> Option<&'a mut Player> {
+    world.app.players.iter_mut().find(|p| p.name == *name)
 }
 
 #[given(expr = "the field to add a player contains {word}")]
