@@ -80,6 +80,10 @@ impl HaloFlashPointCurator {
     }
 
     pub fn handle_start_game_click(&mut self) {
+        if self.players.is_empty() {
+            return;
+        }
+
         self.state = AppState::MassiveSlayer;
 
         let mut turn_slots = Vec::with_capacity(self.players.len());
@@ -144,7 +148,7 @@ impl HaloFlashPointCurator {
                 .players
                 .iter()
                 .filter(|p| p.kill_count < self.battle_royal_kill_required)
-                .map(|p| p.clone())
+                .cloned()
                 .collect();
 
             self.eliminated_players.extend(elimated_players);

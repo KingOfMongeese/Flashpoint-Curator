@@ -3,6 +3,10 @@ Feature: App has a configuring ui at start
     Scenario: App starts in configuring
         Then the app is in the Configuring state
 
+    Scenario: Start Game does nothing if there are no players
+        When the start game button is clicked
+        Then the app is in the Configuring state
+
     Scenario: Adding a Player
         Given the field to add a player contains KingOfMongeese
         When the add player button is clicked

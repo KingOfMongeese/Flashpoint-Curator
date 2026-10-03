@@ -87,7 +87,11 @@ async fn verify_default_on_restart(world: &mut World) {
 #[then(expr = "{} is eliminated")]
 async fn verify_eliminated(world: &mut World, name: String) {
     app_doesnt_contains_player(world, name.clone()).await;
-    let elim_search = world.app.eliminated_players.iter().find(|player| player.name == name);
+    let elim_search = world
+        .app
+        .eliminated_players
+        .iter()
+        .find(|player| player.name == name);
     assert!(elim_search.is_some());
 }
 

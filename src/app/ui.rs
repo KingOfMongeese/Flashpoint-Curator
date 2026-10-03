@@ -4,7 +4,8 @@ use std::collections::VecDeque;
 use super::{AppState, HaloFlashPointCurator};
 
 use crate::app::{
-    handle_add_kill_click, handle_player_pass_click, handle_remove_kill_click, handle_spartan_click_for, player::PlayerTurnState,
+    handle_add_kill_click, handle_player_pass_click, handle_remove_kill_click,
+    handle_spartan_click_for, player::PlayerTurnState,
 };
 use egui::{Key, Slider};
 
@@ -123,13 +124,12 @@ impl HaloFlashPointCurator {
             }
 
             for player_id in spartans_used {
-                    let player = self.players.iter_mut().find(|p| p.id == player_id);
-                    if let Some(player) = player {
-                        player.spartans_used += 1;
-                        self.handle_spartans_for.push_back(player_id);
-                    }
+                let player = self.players.iter_mut().find(|p| p.id == player_id);
+                if let Some(player) = player {
+                    player.spartans_used += 1;
+                    self.handle_spartans_for.push_back(player_id);
                 }
-
+            }
 
             if !self.handle_spartans_for.is_empty() {
                 ui.label("_____________________________");
@@ -160,10 +160,9 @@ impl HaloFlashPointCurator {
                 .iter()
                 .find(|p| p.turn_state == PlayerTurnState::Playing)
                 .is_none()
+                && ui.button("End Turn").clicked()
             {
-                if ui.button("End Turn").clicked() {
-                    self.handle_end_turn_click();
-                }
+                self.handle_end_turn_click();
             }
         });
     }
