@@ -5,7 +5,7 @@ use cucumber::{World as _, then, when};
 use flashpoint_curator::PlayerTurnState;
 
 mod common;
-use common::{World};
+use common::World;
 
 #[when(expr = "the remove player button for {word} is clicked")]
 async fn remove_button_clicked(world: &mut World, name: String) {

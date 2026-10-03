@@ -2,6 +2,8 @@ mod app_state;
 mod player;
 mod ui;
 
+use std::collections::VecDeque;
+
 pub use app_state::AppState;
 pub use player::{Player, PlayerTurnState};
 use serde::{Deserialize, Serialize};
@@ -19,6 +21,7 @@ pub struct HaloFlashPointCurator {
     pub turn_slot: usize,
     pub battle_royal_kill_required: usize,
     pub turn_count: usize,
+    pub handle_spartans_for: VecDeque<usize>,
 }
 
 impl Default for HaloFlashPointCurator {
@@ -32,6 +35,7 @@ impl Default for HaloFlashPointCurator {
             turn_slot: 1,
             battle_royal_kill_required: 4,
             turn_count: 1,
+            handle_spartans_for: VecDeque::with_capacity(8),
         }
     }
 }
@@ -100,6 +104,23 @@ impl HaloFlashPointCurator {
         self.turn_slot = 1;
         for player in &mut self.players {
             player.end_turn();
+        }
+
+        // handle spartan orders
+        while !self.handle_spartans_for.is_empty() {
+            let player_id = self.handle_spartans_for.pop_front().unwrap();
+            let player = self.players.iter_mut().find(|p| p.id == player_id);
+            if let Some(player) = player {
+                let old_turn_slot = player.current_turn_order_number;
+                player.current_turn_order_number = 1;
+                // all players that were above this player get pushed down 1 slot priority
+                self.players
+                    .iter_mut()
+                    .filter(|p| p.id != player_id && p.current_turn_order_number < old_turn_slot)
+                    .for_each(|p| {
+                        p.current_turn_order_number += 1;
+                    });
+            }
         }
 
         // see if we are in battle royal
@@ -172,4 +193,8 @@ pub fn handle_player_pass_click(turn_slot: &mut usize, player: &mut Player) {
     player.next_turn_order_number = *turn_slot;
     *turn_slot += 1;
     player.turn_state = PlayerTurnState::Passed;
+}
+
+pub fn handle_spartan_click_for(spartans: &mut VecDeque<usize>, player_id: usize) {
+    spartans.push_back(player_id);
 }

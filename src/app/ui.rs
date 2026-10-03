@@ -1,10 +1,9 @@
 //! Contains the mappings from UI to Application logic
-
 use super::{AppState, HaloFlashPointCurator};
 
 use crate::app::{
     handle_add_kill_click, handle_player_pass_click, handle_remove_kill_click,
-    player::PlayerTurnState,
+    handle_spartan_click_for, player::PlayerTurnState,
 };
 use egui::{Key, Slider};
 
@@ -111,14 +110,33 @@ impl HaloFlashPointCurator {
                             }
                         } else {
                             ui.label(format!("Passed {}", player.next_turn_order_number));
+                            if ui.button("Spartan").clicked() {
+                                handle_spartan_click_for(&mut self.handle_spartans_for, player.id);
+                            }
                         }
                     });
                 }
             }
 
+            if !self.handle_spartans_for.is_empty() {
+                ui.label("_____________________________");
+                ui.label("Spartan's used that will affect next turn order");
+                for player_id in self.handle_spartans_for.clone() {
+                    let player = self.players.iter().find(|p| p.id == player_id);
+                    if let Some(player) = player {
+                        let spartans_used = self
+                            .handle_spartans_for
+                            .iter()
+                            .filter(|id| player.id == **id)
+                            .count();
+                        ui.label(format!("{}: {spartans_used}", player.name));
+                    }
+                }
+            }
+
             if !self.eliminated_players.is_empty() {
                 ui.label("_____________________________");
-                ui.label("Elimanated Players");
+                ui.label("Eliminated Players");
                 for player in &self.eliminated_players {
                     ui.label(format!(
                         "{}: total_kills: {}, Played {} turns",

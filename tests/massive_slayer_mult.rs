@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use cucumber::{World as _, when, then, given};
+use cucumber::{World as _, given, then, when};
 
 mod common;
 use common::World;
@@ -20,7 +20,12 @@ async fn player_kill_incremented(world: &mut World, name: String) {
 
 #[when(expr = "the pass button for {word} is clicked")]
 async fn pass_button_clicked(world: &mut World, name: String) {
-    let player = world.app.players.iter_mut().find(|p| p.name == name).expect("failed to find player");
+    let player = world
+        .app
+        .players
+        .iter_mut()
+        .find(|p| p.name == name)
+        .expect("failed to find player");
     let turn_slot = &mut world.app.turn_slot;
     flashpoint_curator::app::handle_player_pass_click(turn_slot, player);
 }
@@ -41,6 +46,18 @@ async fn remove_kill_click(world: &mut World, name: String) {
     flashpoint_curator::app::handle_remove_kill_click(player);
 }
 
+#[when(expr = "the spartan button for {word} is clicked")]
+async fn spartan_button(world: &mut World, name: String) {
+    let player = world
+        .app
+        .players
+        .iter_mut()
+        .find(|p| p.name == name)
+        .expect("failed to find player");
+    let spartans = &mut world.app.handle_spartans_for;
+    flashpoint_curator::app::handle_spartan_click_for(spartans, player.id);
+}
+
 #[then(expr = "{word}'s kills is {word}")]
 async fn verify_kills_incremented(world: &mut World, name: String, expected_kills: usize) {
     let player = common::get_player_by_name(world, &name).expect("failed to get player");
@@ -51,18 +68,17 @@ async fn verify_kills_incremented(world: &mut World, name: String, expected_kill
 async fn verify_next_turn_number(world: &mut World, name: String, expected_turn_number: usize) {
     let player = common::get_player_by_name(world, &name).expect("failed to get player");
     assert_eq!(player.next_turn_order_number, expected_turn_number);
-    
 }
 
 #[then(expr = "{word}'s current turn number is {word}")]
 async fn verify_current_turn_number(world: &mut World, name: String, expected_turn_number: usize) {
     let player = common::get_player_by_name(world, &name).expect("failed to get player");
-    assert_eq!(player.current_turn_order_number, expected_turn_number);   
+    assert_eq!(player.current_turn_order_number, expected_turn_number);
 }
 
 #[then(expr = "the app's data is set back to default")]
 async fn verify_default_on_restart(world: &mut World) {
-    let default_app = HaloFlashPointCurator::default(); 
+    let default_app = HaloFlashPointCurator::default();
     assert_eq!(world.app, default_app);
 }
 

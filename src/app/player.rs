@@ -15,6 +15,7 @@ pub struct Player {
     pub id: usize,
     pub turn_state: PlayerTurnState,
     pub played_turn_count: usize,
+    pub spartans_used: usize,
 }
 
 impl Player {
@@ -23,6 +24,7 @@ impl Player {
         self.next_turn_order_number = 0;
         self.turn_state = PlayerTurnState::Playing;
         self.played_turn_count += 1;
+        self.spartans_used = 0;
     }
 
     pub fn new(name: String, id: usize) -> Self {
@@ -34,6 +36,7 @@ impl Player {
             id,
             turn_state: PlayerTurnState::Playing,
             played_turn_count: 0,
+            spartans_used: 0,
         }
     }
 }
