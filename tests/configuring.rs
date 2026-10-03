@@ -15,19 +15,6 @@ async fn remove_button_clicked(world: &mut World, name: String) {
         .handle_remove_player_click(&player.expect("failed to find player").clone());
 }
 
-#[then(expr = "the app contains a player called {word}")]
-async fn app_contains_player(world: &mut World, name: String) {
-    let find_player = common::get_player_by_name(world, &name);
-    assert!(find_player.is_some());
-}
-
-#[then(expr = "the app does not contain a player called {word}")]
-async fn app_doesnt_contains_player(world: &mut World, name: String) {
-    let player_search = common::get_player_by_name(world, &name);
-
-    assert!(player_search.is_none());
-}
-
 #[then(expr = "the player {word} has zeroed stats")]
 async fn player_is_zeroed(world: &mut World, name: String) {
     let player = common::get_player_by_name(world, &name);

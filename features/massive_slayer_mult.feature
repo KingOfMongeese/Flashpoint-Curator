@@ -252,3 +252,209 @@ Feature: App has a main playing mode for massive slayer multiplayer
           And Noa's current turn number is 5
           And Ned's current turn number is 6
           And Charlie's current turn number is 7
+
+    Scenario: Players with less kills than battle royal mode are elminated when battle royal is triggered
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And KingOfMongeese's kills is 4
+          And Larry's kills is 4
+          And Noa's kills is 3
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+
+    Scenario: Players with less kills than battle royal mode are elminated when battle royal is triggered, battle continues til one player out kills the other
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And KingOfMongeese's kills is 4
+          And Larry's kills is 4
+          And Noa's kills is 3
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+        
+        Given KingOfMongeese's kills is 4
+          And Larry's kills is 4
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+        
+        Given KingOfMongeese's kills is 5
+          And Larry's kills is 5
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+        
+        Given KingOfMongeese's kills is 4
+          And Larry's kills is 6
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And KingOfMongeese is eliminated
+          And the app contains a player called Larry
+
+    Scenario: Battle royal is triggered when two players are tied above a lower player
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And KingOfMongeese's kills is 5
+          And Larry's kills is 5
+          And Noa's kills is 4
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+
+    Scenario: Battle royal is triggered with four players and one player below the threshold
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And the app contains a player called Ned
+          And KingOfMongeese's kills is 4
+          And Larry's kills is 4
+          And Noa's kills is 4
+          And Ned's kills is 3
+        
+        When the next turn button is clicked
+        Then Ned is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+
+    Scenario: Battle royal is triggered with the lower player in the middle
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And the app contains a player called Ned
+          And KingOfMongeese's kills is 4
+          And Larry's kills is 3
+          And Noa's kills is 4
+          And Ned's kills is 4
+        
+        When the next turn button is clicked
+        Then Larry is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Noa
+          And the app contains a player called Ned
+
+    Scenario: Battle royal is triggered with the lower player at the beginning
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And KingOfMongeese's kills is 3
+          And Larry's kills is 4
+          And Noa's kills is 4
+        
+        When the next turn button is clicked
+        Then KingOfMongeese is eliminated
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+
+    Scenario: Battle royal is triggered with the lower player at the end
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And KingOfMongeese's kills is 4
+          And Larry's kills is 4
+          And Noa's kills is 3
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+
+        Given KingOfMongeese's kills is 5
+          And Larry's kills is 5
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+
+        Given KingOfMongeese's kills is 6
+          And Larry's kills is 5
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And Larry is eliminated
+          And the app contains a player called KingOfMongeese
+
+    Scenario: Battle royal continues with three players after one player is eliminated
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And the app contains a player called Ned
+          And KingOfMongeese's kills is 5
+          And Larry's kills is 5
+          And Noa's kills is 5
+          And Ned's kills is 4
+        
+        When the next turn button is clicked
+        Then Ned is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+        
+        Given KingOfMongeese's kills is 5
+          And Larry's kills is 6
+          And Noa's kills is 6
+        
+        When the next turn button is clicked
+        Then Ned is eliminated
+          And KingOfMongeese is eliminated
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+        
+        Given Larry's kills is 6
+          And Noa's kills is 6
+        
+        When the next turn button is clicked
+        Then Ned is eliminated
+          And KingOfMongeese is eliminated
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+        
+        Given Larry's kills is 7
+          And Noa's kills is 6
+        
+        When the next turn button is clicked
+        Then Ned is eliminated
+          And KingOfMongeese is eliminated
+          And Noa is eliminated
+          And the app contains a player called Larry
+
+    Scenario: Battle royal with more than six players eliminates players below the threshold
+        Given the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Noa
+          And the app contains a player called Ned
+          And the app contains a player called Alice
+          And the app contains a player called Bob
+          And the app contains a player called Charlie
+          And KingOfMongeese's kills is 4
+          And Larry's kills is 4
+          And Noa's kills is 3
+          And Ned's kills is 4
+          And Alice's kills is 3
+          And Bob's kills is 4
+          And Charlie's kills is 4
+        
+        When the next turn button is clicked
+        Then Noa is eliminated
+          And Alice is eliminated
+          And the app contains a player called KingOfMongeese
+          And the app contains a player called Larry
+          And the app contains a player called Ned
+          And the app contains a player called Bob
+          And the app contains a player called Charlie

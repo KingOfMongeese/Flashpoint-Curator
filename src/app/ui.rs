@@ -1,9 +1,10 @@
 //! Contains the mappings from UI to Application logic
+use std::collections::VecDeque;
+
 use super::{AppState, HaloFlashPointCurator};
 
 use crate::app::{
-    handle_add_kill_click, handle_player_pass_click, handle_remove_kill_click,
-    handle_spartan_click_for, player::PlayerTurnState,
+    handle_add_kill_click, handle_player_pass_click, handle_remove_kill_click, handle_spartan_click_for, player::PlayerTurnState,
 };
 use egui::{Key, Slider};
 
@@ -77,6 +78,9 @@ impl HaloFlashPointCurator {
             ui.heading("Massive Slayer Multiplayer");
             ui.label(format!("Turn: {}", self.turn_count));
 
+            // temp redirect to the spartans used for this frame
+            let mut spartans_used = VecDeque::with_capacity(2);
+
             // check if a player has won
             if self.players.len() == 1 {
                 ui.heading("Victory!!!");
@@ -111,25 +115,29 @@ impl HaloFlashPointCurator {
                         } else {
                             ui.label(format!("Passed {}", player.next_turn_order_number));
                             if ui.button("Spartan").clicked() {
-                                handle_spartan_click_for(&mut self.handle_spartans_for, player.id);
+                                handle_spartan_click_for(&mut spartans_used, player.id);
                             }
                         }
                     });
                 }
             }
 
+            for player_id in spartans_used {
+                    let player = self.players.iter_mut().find(|p| p.id == player_id);
+                    if let Some(player) = player {
+                        player.spartans_used += 1;
+                        self.handle_spartans_for.push_back(player_id);
+                    }
+                }
+
+
             if !self.handle_spartans_for.is_empty() {
                 ui.label("_____________________________");
                 ui.label("Spartan's used that will affect next turn order");
-                for player_id in self.handle_spartans_for.clone() {
-                    let player = self.players.iter().find(|p| p.id == player_id);
-                    if let Some(player) = player {
-                        let spartans_used = self
-                            .handle_spartans_for
-                            .iter()
-                            .filter(|id| player.id == **id)
-                            .count();
-                        ui.label(format!("{}: {spartans_used}", player.name));
+
+                for player in &self.players {
+                    if player.spartans_used > 0 {
+                        ui.label(format!("{}: {}", player.name, player.spartans_used));
                     }
                 }
             }

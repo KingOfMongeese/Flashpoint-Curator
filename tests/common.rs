@@ -48,3 +48,16 @@ pub async fn app_is_in_x_state(world: &mut World, state: String) {
 
     assert_eq!(world.app.state, app_state);
 }
+
+#[then(expr = "the app does not contain a player called {word}")]
+pub async fn app_doesnt_contains_player(world: &mut World, name: String) {
+    let player_search = get_player_by_name(world, &name);
+
+    assert!(player_search.is_none());
+}
+
+#[then(expr = "the app contains a player called {word}")]
+pub async fn app_contains_player(world: &mut World, name: String) {
+    let find_player = get_player_by_name(world, &name);
+    assert!(find_player.is_some());
+}

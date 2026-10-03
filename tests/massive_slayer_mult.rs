@@ -6,6 +6,8 @@ mod common;
 use common::World;
 use flashpoint_curator::HaloFlashPointCurator;
 
+use crate::common::app_doesnt_contains_player;
+
 #[given(expr = "{word}'s kills is {word}")]
 async fn set_kills_to(world: &mut World, name: String, new_kills: usize) {
     let player = common::get_player_by_name_mut(world, &name).expect("failed to get player");
@@ -80,6 +82,13 @@ async fn verify_current_turn_number(world: &mut World, name: String, expected_tu
 async fn verify_default_on_restart(world: &mut World) {
     let default_app = HaloFlashPointCurator::default();
     assert_eq!(world.app, default_app);
+}
+
+#[then(expr = "{} is eliminated")]
+async fn verify_eliminated(world: &mut World, name: String) {
+    app_doesnt_contains_player(world, name.clone()).await;
+    let elim_search = world.app.eliminated_players.iter().find(|player| player.name == name);
+    assert!(elim_search.is_some());
 }
 
 #[tokio::main]
