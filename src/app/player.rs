@@ -9,7 +9,7 @@ pub enum PlayerTurnState {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Player {
     pub name: String,
-    pub kill_count: usize,
+    pub points: usize,
     pub current_turn_order_number: usize,
     pub next_turn_order_number: usize,
     pub id: usize,
@@ -30,7 +30,7 @@ impl Player {
     pub fn new(name: String, id: usize) -> Self {
         Self {
             name,
-            kill_count: 0,
+            points: 0,
             current_turn_order_number: 0,
             next_turn_order_number: 0,
             id,

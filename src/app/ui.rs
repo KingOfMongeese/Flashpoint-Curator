@@ -62,10 +62,7 @@ impl HaloFlashPointCurator {
             ui.label("_____________________________");
 
             ui.label("Game Settings");
-            ui.add(
-                Slider::new(&mut self.battle_royal_kill_required, 2..=16)
-                    .text("Kills to trigger Battle Royal mode"),
-            );
+            ui.add(Slider::new(&mut self.pts_required, 4..=32).text("Points required to win."));
             ui.label("_____________________________");
 
             if ui.button("Start Game").clicked() {
@@ -78,18 +75,34 @@ impl HaloFlashPointCurator {
         egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("Massive Slayer Multiplayer");
             ui.label(format!("Turn: {}", self.turn_count));
+            ui.label(format!("Points to Win: {}", self.pts_required));
 
             // temp redirect to the spartans used for this frame
             let mut spartans_used = VecDeque::with_capacity(2);
 
-            // check if a player has won
-            if self.players.len() == 1 {
+            // check if the game is over and display the winner
+            if self.game_over {
+                let players_at_victory_threshold = self
+                    .players
+                    .iter()
+                    .filter(|p| p.points >= self.pts_required);
+
                 ui.heading("Victory!!!");
-                let player = &self.players[0];
-                ui.label(format!(
-                    "{}: total_kills: {}, Played {} turns",
-                    player.name, player.kill_count, player.played_turn_count
-                ));
+                ui.heading("Winners (before tie breaker): ");
+                for player in players_at_victory_threshold {
+                    ui.label(format!(
+                        "{}: total_kills: {}, Played {} turns",
+                        player.name, player.points, player.played_turn_count
+                    ));
+                }
+
+                ui.heading("Other Players: ");
+                for player in self.players.iter().filter(|p| p.points < self.pts_required) {
+                    ui.label(format!(
+                        "{}: total_kills: {}, Played {} turns",
+                        player.name, player.points, player.played_turn_count
+                    ));
+                }
 
                 if ui.button("New Game").clicked() {
                     self.reset();
@@ -99,7 +112,7 @@ impl HaloFlashPointCurator {
                     ui.horizontal(|ui| {
                         ui.label(format!("{} ", player.current_turn_order_number));
                         ui.label(player.name.clone());
-                        ui.label(format!("Kills: {}", player.kill_count));
+                        ui.label(format!("Points: {}", player.points));
 
                         if ui.button("Remove Kill").clicked() {
                             handle_remove_kill_click(player);
@@ -140,18 +153,6 @@ impl HaloFlashPointCurator {
                         ui.label(format!("{}: {}", player.name, player.spartans_used));
                     }
                 }
-            }
-
-            if !self.eliminated_players.is_empty() {
-                ui.label("_____________________________");
-                ui.label("Eliminated Players");
-                for player in &self.eliminated_players {
-                    ui.label(format!(
-                        "{}: total_kills: {}, Played {} turns",
-                        player.name, player.kill_count, player.played_turn_count
-                    ));
-                }
-                ui.label("_____________________________");
             }
 
             // only display end turn button if all players have passed

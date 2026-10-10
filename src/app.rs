@@ -15,13 +15,13 @@ use rand::seq::SliceRandom;
 pub struct HaloFlashPointCurator {
     pub state: AppState,
     pub players: Vec<Player>,
-    pub eliminated_players: Vec<Player>,
     pub adding_player_name: String,
     pub id_counter: usize,
     pub turn_slot: usize,
-    pub battle_royal_kill_required: usize,
+    pub pts_required: usize,
     pub turn_count: usize,
     pub handle_spartans_for: VecDeque<usize>,
+    pub game_over: bool,
 }
 
 impl Default for HaloFlashPointCurator {
@@ -29,13 +29,13 @@ impl Default for HaloFlashPointCurator {
         Self {
             state: AppState::Configuring,
             players: Vec::with_capacity(16),
-            eliminated_players: Vec::with_capacity(16),
             adding_player_name: String::with_capacity(32),
             id_counter: 1,
             turn_slot: 1,
-            battle_royal_kill_required: 4,
+            pts_required: 6,
             turn_count: 1,
             handle_spartans_for: VecDeque::with_capacity(8),
+            game_over: false,
         }
     }
 }
@@ -110,6 +110,18 @@ impl HaloFlashPointCurator {
             player.end_turn();
         }
 
+        // see if the game is over
+        if self
+            .players
+            .iter()
+            .filter(|p| p.points >= self.pts_required)
+            .count()
+            >= 1
+        {
+            self.game_over = true;
+            return;
+        }
+
         // handle spartan orders
         while !self.handle_spartans_for.is_empty() {
             let player_id = self.handle_spartans_for.pop_front().unwrap();
@@ -127,54 +139,6 @@ impl HaloFlashPointCurator {
             }
         }
 
-        // see if we are in battle royal
-        if self
-            .players
-            .iter()
-            .find(|p| p.kill_count >= self.battle_royal_kill_required)
-            .is_some()
-        {
-            let mut highest_kill_cnt = self.players[0].kill_count;
-            for player in &self.players {
-                if player.kill_count > highest_kill_cnt {
-                    highest_kill_cnt = player.kill_count;
-                }
-            }
-
-            self.battle_royal_kill_required = highest_kill_cnt;
-
-            // get all the players we will elimnate
-            let elimated_players: Vec<Player> = self
-                .players
-                .iter()
-                .filter(|p| p.kill_count < self.battle_royal_kill_required)
-                .cloned()
-                .collect();
-
-            self.eliminated_players.extend(elimated_players);
-
-            // only keep players that meet the kill count
-            self.players
-                .retain(|p| p.kill_count >= self.battle_royal_kill_required);
-
-            // now the kill count will be 1 higher
-            self.battle_royal_kill_required += 1;
-
-            // reset the turn slots as we removed players
-            self.players.sort_by(|a, b| {
-                a.current_turn_order_number
-                    .cmp(&b.current_turn_order_number)
-            });
-
-            // fix the turn slots number
-            self.players
-                .iter_mut()
-                .enumerate()
-                .for_each(|(corrected_turn_slot, p)| {
-                    p.current_turn_order_number = corrected_turn_slot + 1
-                });
-        }
-
         // sort the players by turn order number
         self.players.sort_by(|a, b| {
             a.current_turn_order_number
@@ -186,11 +150,11 @@ impl HaloFlashPointCurator {
 }
 
 pub fn handle_remove_kill_click(player: &mut Player) {
-    player.kill_count = player.kill_count.saturating_sub(1);
+    player.points = player.points.saturating_sub(1);
 }
 
 pub fn handle_add_kill_click(player: &mut Player) {
-    player.kill_count = player.kill_count.saturating_add(1);
+    player.points = player.points.saturating_add(2);
 }
 
 pub fn handle_player_pass_click(turn_slot: &mut usize, player: &mut Player) {
