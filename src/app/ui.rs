@@ -109,6 +109,7 @@ impl HaloFlashPointCurator {
                 }
             } else {
                 for player in &mut self.players {
+                    ui.label("-----------------------");
                     ui.horizontal(|ui| {
                         ui.label(format!("{} ", player.current_turn_order_number));
                         ui.label(player.name.clone());
@@ -121,7 +122,9 @@ impl HaloFlashPointCurator {
                         if ui.button("Add Kill").clicked() {
                             handle_add_kill_click(player);
                         }
+                    });
 
+                    ui.horizontal(|ui| {
                         if player.turn_state == PlayerTurnState::Playing {
                             if ui.button("Pass").clicked() {
                                 handle_player_pass_click(&mut self.turn_slot, player);
@@ -146,7 +149,7 @@ impl HaloFlashPointCurator {
 
             if !self.handle_spartans_for.is_empty() {
                 ui.label("_____________________________");
-                ui.label("Spartan's used that will affect next turn order");
+                ui.label("Spartan's used that will affect next turn order:");
 
                 for player in &self.players {
                     if player.spartans_used > 0 {
